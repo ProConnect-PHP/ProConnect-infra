@@ -6,6 +6,15 @@ COMPOSE="docker compose -f docker-compose.yml"
 
 cd "$APP_DIR"
 
+if [ ! -f .env ]; then
+  echo "ERROR: .env file not found in $APP_DIR"
+  exit 1
+fi
+
+set -a
+source .env
+set +a
+
 echo "==> Pull images"
 $COMPOSE pull
 
