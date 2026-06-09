@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eu
 
-APP_DIR=/opt/proconnect
-
-cd "$APP_DIR"
-
-echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-
-docker compose pull
-docker compose up -d
-
+cd /opt/proconnect
+docker compose -f docker-compose.yml pull
+docker compose -f docker-compose.yml up -d
 docker image prune -af
