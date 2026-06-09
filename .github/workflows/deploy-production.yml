@@ -124,7 +124,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           envs: GHCR_USERNAME,GHCR_READ_TOKEN
           script: |
-            set -euo pipefail
+            set -euo
 
             cd /opt/proconnect
 
