@@ -15,6 +15,26 @@ set -a
 source .env
 set +a
 
+reload_nginx_container() {
+  local container_name="$1"
+
+  if docker ps --format '{{.Names}}' | grep -q "^${container_name}$"; then
+    echo "==> Testing nginx config in ${container_name}"
+
+    if ! docker exec "$container_name" nginx -t; then
+      echo "ERROR: nginx config test failed in ${container_name}"
+      echo "==> Last logs from ${container_name}"
+      docker logs --tail=120 "$container_name" || true
+      exit 1
+    fi
+
+    echo "==> Reloading nginx in ${container_name}"
+    docker exec "$container_name" nginx -s reload
+  else
+    echo "==> ${container_name} not found, skipping nginx reload"
+  fi
+}
+
 echo "==> Pull images"
 $COMPOSE pull
 
@@ -44,6 +64,7 @@ until $COMPOSE exec -T postgres pg_isready -U "$DB_USERNAME" -d "$DB_DATABASE" >
   echo "Waiting for PostgreSQL... ($RETRY/$MAX_RETRIES)"
   sleep 2
 done
+
 echo "==> Run Laravel preparation using one-off containers"
 
 echo "==> Clear Laravel caches"
@@ -74,7 +95,11 @@ $COMPOSE run --rm backend php artisan route:cache
 $COMPOSE run --rm backend php artisan view:cache
 
 echo "==> Start application stack"
-$COMPOSE up -d
+$COMPOSE up -d --remove-orphans
+
+echo "==> Reload nginx containers"
+reload_nginx_container "proconnect_nginx"
+reload_nginx_container "edge_nginx"
 
 if $COMPOSE config --services | grep -q '^horizon$'; then
   echo "==> Restart Horizon gracefully"
@@ -89,6 +114,27 @@ fi
 
 echo "==> Containers status"
 $COMPOSE ps
+
+echo "==> Internal health checks"
+
+if docker ps --format '{{.Names}}' | grep -q '^proconnect_nginx$'; then
+  echo "==> Checking frontend upstream from proconnect_nginx"
+  docker exec proconnect_nginx sh -lc "wget -qO- http://frontend:4000 >/dev/null" || {
+    echo "WARNING: frontend upstream check failed from proconnect_nginx"
+  }
+
+  echo "==> Checking backend upstream from proconnect_nginx"
+  docker exec proconnect_nginx sh -lc "wget -qO- http://backend:8080 >/dev/null" || {
+    echo "WARNING: backend upstream check failed from proconnect_nginx"
+  }
+
+  if $COMPOSE config --services | grep -q '^livekit$'; then
+    echo "==> Checking livekit upstream from proconnect_nginx"
+    docker exec proconnect_nginx sh -lc "wget -qO- http://livekit:7880 >/dev/null" || {
+      echo "WARNING: livekit upstream check failed from proconnect_nginx"
+    }
+  fi
+fi
 
 echo "==> Cleanup old images"
 docker image prune -f
