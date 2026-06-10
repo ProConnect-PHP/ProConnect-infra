@@ -116,6 +116,7 @@ jobs:
             LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
             LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}
             LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}
+            LIVEKIT_TOKEN_TTL_SECONDS=${{ secrets.LIVEKIT_TOKEN_TTL_SECONDS }}
 
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
