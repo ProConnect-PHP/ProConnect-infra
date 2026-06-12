@@ -30,8 +30,12 @@ services:
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
     expose:
       - "8080"
     networks:
@@ -45,9 +49,12 @@ services:
       - .env
     command: php artisan horizon
     depends_on:
-      - backend
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
     networks:
       - proconnect_internal
     restart: unless-stopped
@@ -59,9 +66,12 @@ services:
       - .env
     command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
     depends_on:
-      - backend
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
     networks:
       - proconnect_internal
     restart: unless-stopped
@@ -93,6 +103,25 @@ services:
     networks:
       - proconnect_internal
     restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    container_name: proconnect_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - proconnect_internal
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok' -u ${MONGODB_USERNAME} -p ${MONGODB_PASSWORD} --authenticationDatabase admin | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
   livekit:
     image: livekit/livekit-server:latest
     container_name: proconnect_livekit
@@ -111,6 +140,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  mongodb_data:
 
 networks:
   public:
