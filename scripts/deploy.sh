@@ -38,8 +38,8 @@ reload_nginx_container() {
 echo "==> Pull images"
 $COMPOSE pull
 
-echo "==> Start postgres and redis first"
-$COMPOSE up -d postgres redis
+echo "==> Start database/cache services first"
+$COMPOSE up -d postgres redis mongodb
 
 echo "==> Wait for PostgreSQL"
 
@@ -65,6 +65,35 @@ until $COMPOSE exec -T postgres pg_isready -U "$DB_USERNAME" -d "$DB_DATABASE" >
   sleep 2
 done
 
+echo "==> Wait for MongoDB"
+
+MAX_MONGO_RETRIES=45
+MONGO_RETRY=0
+
+until $COMPOSE exec -T mongodb mongosh --quiet \
+  --eval 'db.adminCommand({ ping: 1 }).ok' \
+  -u "$MONGODB_USERNAME" \
+  -p "$MONGODB_PASSWORD" \
+  --authenticationDatabase admin | grep -q 1; do
+
+  MONGO_RETRY=$((MONGO_RETRY + 1))
+
+  if [ "$MONGO_RETRY" -ge "$MAX_MONGO_RETRIES" ]; then
+    echo "ERROR: MongoDB did not become ready in time"
+
+    echo "==> MongoDB status"
+    $COMPOSE ps mongodb || true
+
+    echo "==> MongoDB logs"
+    $COMPOSE logs --tail=120 mongodb || true
+
+    exit 1
+  fi
+
+  echo "Waiting for MongoDB... ($MONGO_RETRY/$MAX_MONGO_RETRIES)"
+  sleep 2
+done
+
 echo "==> Run Laravel preparation using one-off containers"
 
 echo "==> Clear Laravel caches"
@@ -85,9 +114,6 @@ else
     $COMPOSE run --rm backend php artisan db:seed --force
   fi
 fi
-
-echo "==> Storage link"
-$COMPOSE run --rm backend php artisan storage:link || true
 
 echo "==> Cache Laravel"
 $COMPOSE run --rm backend php artisan config:cache
@@ -123,9 +149,14 @@ if docker ps --format '{{.Names}}' | grep -q '^proconnect_nginx$'; then
     echo "WARNING: frontend upstream check failed from proconnect_nginx"
   }
 
-  echo "==> Checking backend upstream from proconnect_nginx"
-  docker exec proconnect_nginx sh -lc "wget -qO- http://backend:8080 >/dev/null" || {
-    echo "WARNING: backend upstream check failed from proconnect_nginx"
+  echo "==> Checking backend PHP-FPM port from proconnect_nginx"
+  docker exec proconnect_nginx sh -lc "nc -z backend 9000" || {
+    echo "WARNING: backend PHP-FPM port check failed from proconnect_nginx"
+  }
+
+  echo "==> Checking API through nginx FastCGI"
+  docker exec proconnect_nginx sh -lc "wget -qO- --header='Host: ${API_DOMAIN}' http://127.0.0.1/api/v1/public/services >/dev/null" || {
+    echo "WARNING: API check through nginx failed"
   }
 
   if $COMPOSE config --services | grep -q '^livekit$'; then
