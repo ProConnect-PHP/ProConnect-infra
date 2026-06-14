@@ -184,13 +184,17 @@ jobs:
             MICROSOFT_CLIENT_ID=${{ vars.MICROSOFT_CLIENT_ID }}
             MICROSOFT_CLIENT_SECRET=${{ secrets.MICROSOFT_CLIENT_SECRET }}
             MICROSOFT_REDIRECT_URI=https://${{ vars.API_DOMAIN }}/api/v1/auth/oauth/microsoft/callback
-            REVERB_APP_ID=local
-            REVERB_APP_KEY=proconnect-key
-            REVERB_APP_SECRET=local
+            REVERB_APP_ID=proconnect-production
+            REVERB_APP_KEY=${{ vars.REVERB_APP_KEY }}
+            REVERB_APP_SECRET=${{ secrets.REVERB_APP_SECRET }}
             
-            REVERB_HOST=proconnect_laravel
-            REVERB_PORT=8080
-            REVERB_SCHEME=http
+            REVERB_HOST=reverbtallerphp.gyabisito.dev
+            REVERB_PORT=443
+            REVERB_SCHEME=https
+            
+            REVERB_SERVER_HOST=0.0.0.0
+            REVERB_SERVER_PORT=8080
+            
             SEED_DEMO_DATA=false
             EOF
 
