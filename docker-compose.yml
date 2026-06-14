@@ -155,7 +155,7 @@ services:
     networks:
       - proconnect_internal
     restart: unless-stopped
-
+    
 volumes:
   postgres_data:
   redis_data:
