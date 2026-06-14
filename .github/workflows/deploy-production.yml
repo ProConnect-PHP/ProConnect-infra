@@ -76,7 +76,7 @@ jobs:
 
             chmod 600 /opt/proconnect/docker/livekit/livekit.yaml
 
-            cat > /opt/proconnect/.env <<EOF
+            cat > /opt/proconnect/.env <<'EOF'
             APP_NAME=ProConnect
             APP_ENV=production
             APP_KEY=${{ secrets.APP_KEY }}
