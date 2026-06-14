@@ -136,6 +136,25 @@ services:
     networks:
       - proconnect_internal
     restart: unless-stopped
+    
+  reverb:
+    image: ${BACKEND_IMAGE}:latest
+    container_name: proconnect_reverb
+    env_file:
+      - .env
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
+    expose:
+      - "8080"
+    networks:
+      - proconnect_internal
+    restart: unless-stopped
 
 volumes:
   postgres_data:
