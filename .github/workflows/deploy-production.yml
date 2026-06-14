@@ -117,7 +117,7 @@ jobs:
             SESSION_PATH=/
             SESSION_DOMAIN=null
 
-            BROADCAST_CONNECTION=log
+            BROADCAST_CONNECTION=reverb
             FILESYSTEM_DISK=local
             QUEUE_CONNECTION=redis
 
@@ -184,7 +184,13 @@ jobs:
             MICROSOFT_CLIENT_ID=${{ vars.MICROSOFT_CLIENT_ID }}
             MICROSOFT_CLIENT_SECRET=${{ secrets.MICROSOFT_CLIENT_SECRET }}
             MICROSOFT_REDIRECT_URI=https://${{ vars.API_DOMAIN }}/api/v1/auth/oauth/microsoft/callback
-
+            REVERB_APP_ID=local
+            REVERB_APP_KEY=proconnect-key
+            REVERB_APP_SECRET=local
+            
+            REVERB_HOST=proconnect_laravel
+            REVERB_PORT=8080
+            REVERB_SCHEME=http
             SEED_DEMO_DATA=false
             EOF
 
