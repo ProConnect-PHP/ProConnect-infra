@@ -96,6 +96,7 @@ jobs:
 
             APP_MAINTENANCE_DRIVER=file
             APP_MAINTENANCE_STORE=database
+            PHP_CLI_SERVER_WORKERS=4
 
             BCRYPT_ROUNDS=12
 
@@ -123,6 +124,7 @@ jobs:
 
             CACHE_STORE=redis
             CACHE_PREFIX=
+            MEMCACHED_HOST=127.0.0.1
 
             REDIS_CLIENT=phpredis
             REDIS_HOST=redis
@@ -154,13 +156,11 @@ jobs:
             MAPBOX_PUBLIC_TOKEN=${{ vars.MAPBOX_PUBLIC_TOKEN }}
 
             REVIEW_EDIT_WINDOW_DAYS=${{ vars.REVIEW_EDIT_WINDOW_DAYS }}
-            PAYMENTS_CURRENCY=${{ vars.PAYMENTS_CURRENCY }}
-            PAYMENT_INTENT_EXPIRATION_MINUTES=${{ vars.PAYMENT_INTENT_EXPIRATION_MINUTES }}
 
             VIDEO_PROVIDER=${{ vars.VIDEO_PROVIDER }}
             VIDEO_JOIN_BEFORE_MINUTES=${{ vars.VIDEO_JOIN_BEFORE_MINUTES }}
             VIDEO_JOIN_AFTER_MINUTES=${{ vars.VIDEO_JOIN_AFTER_MINUTES }}
-            VIDEO_SIMULATOR_BASE_URL=${{ vars.VIDEO_SIMULATOR_BASE_URL }}
+            VIDEO_SIMULATOR_BASE_URL=https://${{ vars.APP_DOMAIN }}/video
 
             LIVEKIT_URL=${{ vars.LIVEKIT_URL }}
             LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}
@@ -173,28 +173,64 @@ jobs:
             AWS_BUCKET=${{ vars.AWS_BUCKET }}
             AWS_USE_PATH_STYLE_ENDPOINT=false
 
+            VITE_APP_NAME="${{ vars.APP_NAME }}"
+
             GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             GOOGLE_REDIRECT_URI=https://${{ vars.API_DOMAIN }}/api/v1/auth/oauth/google/callback
 
             GITHUB_CLIENT_ID=${{ vars.OAUTH_GITHUB_CLIENT_ID }}
             GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
-            GITHUB_REDIRECT_URI=${{ vars.OAUTH_GITHUB_REDIRECT_URI }}
+            GITHUB_REDIRECT_URI=https://${{ vars.API_DOMAIN }}/api/v1/auth/oauth/github/callback
 
             MICROSOFT_CLIENT_ID=${{ vars.MICROSOFT_CLIENT_ID }}
             MICROSOFT_CLIENT_SECRET=${{ secrets.MICROSOFT_CLIENT_SECRET }}
             MICROSOFT_REDIRECT_URI=https://${{ vars.API_DOMAIN }}/api/v1/auth/oauth/microsoft/callback
+
+            PAYMENT_DEFAULT_PROVIDER=${{ vars.PAYMENT_DEFAULT_PROVIDER }}
+            PAYMENT_ENABLED_PROVIDERS=${{ vars.PAYMENT_ENABLED_PROVIDERS }}
+            PAYMENT_SIMULATOR_ENABLED=${{ vars.PAYMENT_SIMULATOR_ENABLED }}
+            PAYMENTS_CURRENCY=${{ vars.PAYMENTS_CURRENCY }}
+            PAYMENT_INTENT_EXPIRATION_MINUTES=${{ vars.PAYMENT_INTENT_EXPIRATION_MINUTES }}
+
+            MERCADOPAGO_ACCESS_TOKEN=${{ secrets.MERCADOPAGO_ACCESS_TOKEN }}
+            MERCADOPAGO_PUBLIC_KEY=${{ vars.MERCADOPAGO_PUBLIC_KEY }}
+            MERCADOPAGO_WEBHOOK_SECRET=${{ secrets.MERCADOPAGO_WEBHOOK_SECRET }}
+            MERCADOPAGO_SUCCESS_URL=https://${{ vars.APP_DOMAIN }}/payments/success
+            MERCADOPAGO_FAILURE_URL=https://${{ vars.APP_DOMAIN }}/payments/failure
+            MERCADOPAGO_PENDING_URL=https://${{ vars.APP_DOMAIN }}/payments/pending
+            MERCADOPAGO_NOTIFICATION_URL=https://${{ vars.API_DOMAIN }}/api/v1/payments/mercadopago/webhook
+            MERCADOPAGO_WEBHOOK_SIGNATURE_REQUIRED=true
+            MERCADOPAGO_WEBHOOK_SIGNATURE_TOLERANCE_SECONDS=300
+            MERCADOPAGO_WEBHOOK_SECRET_TEST=${{ secrets.MERCADOPAGO_WEBHOOK_SECRET_TEST }}
+            MERCADOPAGO_WEBHOOK_SECRET_PRODUCTION=${{ secrets.MERCADOPAGO_WEBHOOK_SECRET_PRODUCTION }}
+            MERCADOPAGO_MODE=${{ vars.MERCADOPAGO_MODE }}
+
+            PAYPAL_MODE=${{ vars.PAYPAL_MODE }}
+            PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}
+            PAYPAL_CLIENT_SECRET=${{ secrets.PAYPAL_CLIENT_SECRET }}
+            PAYPAL_WEBHOOK_ID=${{ secrets.PAYPAL_WEBHOOK_ID }}
+            PAYPAL_CURRENCY=${{ vars.PAYPAL_CURRENCY }}
+            PAYPAL_EXCHANGE_RATES=${{ vars.PAYPAL_EXCHANGE_RATES }}
+            PAYPAL_SUCCESS_URL=https://${{ vars.APP_DOMAIN }}/payments/success
+            PAYPAL_CANCEL_URL=https://${{ vars.APP_DOMAIN }}/payments/cancel
+
             REVERB_APP_ID=proconnect-production
             REVERB_APP_KEY=${{ vars.REVERB_APP_KEY }}
             REVERB_APP_SECRET=${{ secrets.REVERB_APP_SECRET }}
-            
+
             REVERB_HOST=proconnect_reverb
             REVERB_PORT=8080
             REVERB_SCHEME=http
-            
+
             REVERB_SERVER_HOST=0.0.0.0
             REVERB_SERVER_PORT=8080
-            
+
+            SAIL_XDEBUG_MODE=off
+            XDEBUG_MODE=off
+
+            EMAIL_VERIFICATION_TOKEN_TTL_MINUTES=${{ vars.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES }}
+
             SEED_DEMO_DATA=false
             EOF
 
