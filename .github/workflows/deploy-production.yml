@@ -199,7 +199,7 @@ jobs:
             MERCADOPAGO_SUCCESS_URL=https://${{ vars.APP_DOMAIN }}/payments/success
             MERCADOPAGO_FAILURE_URL=https://${{ vars.APP_DOMAIN }}/payments/failure
             MERCADOPAGO_PENDING_URL=https://${{ vars.APP_DOMAIN }}/payments/pending
-            MERCADOPAGO_NOTIFICATION_URL=https://${{ vars.API_DOMAIN }}/api/v1/payments/mercadopago/webhook
+            MERCADOPAGO_NOTIFICATION_URL=${{ vars.MERCADOPAGO_WEBHOOK }}
             MERCADOPAGO_WEBHOOK_SIGNATURE_REQUIRED=false
             MERCADOPAGO_WEBHOOK_SIGNATURE_TOLERANCE_SECONDS=300
             MERCADOPAGO_WEBHOOK_SECRET_TEST=${{ secrets.MERCADOPAGO_WEBHOOK_SECRET_TEST }}
